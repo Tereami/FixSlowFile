@@ -15,6 +15,8 @@ namespace FixSlowFile
         public Definition def;
         public List<Category> categories = new List<Category>();
         public BuiltInParameterGroup paramGroup;
+        public Guid guid;
+        
 
         public MyProjectSharedParameter(Parameter param, Document doc)
         {
@@ -24,6 +26,7 @@ namespace FixSlowFile
             InternalDefinition intDef = def as InternalDefinition;
             if (intDef != null) paramGroup = intDef.ParameterGroup;
 
+            guid = param.GUID;
 
 
             ElementBinding elemBind = this.GetBindingByParamName(Name, doc);

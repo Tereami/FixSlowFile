@@ -18,7 +18,7 @@ namespace FixSlowFile
             string tabName = "Weandrevit";
             try { application.CreateRibbonTab(tabName); } catch { }
 
-            string panelName = "Арматура";
+            string panelName = "Ремонт";
             RibbonPanel panel = null;
             List<RibbonPanel> tryPanels = application.GetRibbonPanels(tabName).Where(i => i.Name == panelName).ToList();
             if (tryPanels.Count == 0)
@@ -34,7 +34,7 @@ namespace FixSlowFile
                 "Start",
                 "Запуск",
                 assemblyPath,
-                "FixSlowFile.Сommand")
+                "FixSlowFile.Command")
                 ) as PushButton;
 
 

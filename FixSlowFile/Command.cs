@@ -11,7 +11,7 @@ using Autodesk.Revit.UI;
 namespace FixSlowFile
 {
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
-    class Command :IExternalCommand
+    class Command : IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -48,6 +48,25 @@ namespace FixSlowFile
             }
 
 
+            DefinitionFile deffile = null;
+            try
+            {
+                deffile = commandData.Application.Application.OpenSharedParameterFile();
+            }
+            catch
+            {
+                TaskDialog.Show("Ошибка", "Не найден файл общих параметров");
+                return Result.Cancelled;
+            }
+
+            if (deffile == null)
+            {
+                TaskDialog.Show("Ошибка", "Некорректный файл общих параметров");
+                return Result.Cancelled;
+            }
+
+
+
             //удаляю параметр проекта (если только 1 категория) или снимаю флажок с категории несущей арматуры (если категорий несколько)
             using (Transaction t = new Transaction(doc))
             {
@@ -59,6 +78,15 @@ namespace FixSlowFile
                         if (myProjectParam.categories.Count == 1)
                         {
                             //параметр только для несущей арматуры, значит надо удалить целиком
+                            //перед этим проверяю, есть ли параметр в фопе
+                            
+                            bool checkParamExistsInDefFile = SharedParamsFileTools.CheckParameterExistsInFile(deffile, myProjectParam.guid);
+                            if (!checkParamExistsInDefFile)
+                            {
+                                SharedParamsFileTools.AddParameterToDefFile(deffile, "NonTemplate parameters", myProjectParam);
+                            }
+
+
                             doc.ParameterBindings.Remove(myProjectParam.def);
                         }
                         else
