@@ -18,8 +18,6 @@ namespace FixSlowFile
             string startTime = DateTime.Now.ToLongTimeString();
             Document doc = commandData.Application.ActiveUIDocument.Document;
 
-            //app.SharedParametersFilename = @"\\picompany.ru\pikp\lib\_CadSettings\02_Revit\04. Shared Parameters\КР\Weandrevit 2017.txt";
-
             //получить все типы арматуры
             List<RebarBarType> rebarTypes = new FilteredElementCollector(doc)
                 .WhereElementIsElementType()
@@ -138,6 +136,7 @@ namespace FixSlowFile
                     {
                         string paramName = param.Definition.Name;
                         MyParameterValue mpv = mrt.ValuesStorage[paramName];
+                        if (mpv.IsNull) continue;
                         mpv.SetValue(param);
                     }
                 }

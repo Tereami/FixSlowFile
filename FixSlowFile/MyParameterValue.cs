@@ -13,6 +13,7 @@ namespace FixSlowFile
         public MyProjectSharedParameter projectParam;
         public StorageType storageType;
         public bool IsValid = false;
+        public bool IsNull = false;
 
         public string StringValue;
         public double DoubleValue;
@@ -21,6 +22,11 @@ namespace FixSlowFile
 
         public MyParameterValue(Parameter revitParam)
         {
+            if(!revitParam.HasValue)
+            {
+                IsNull = true;
+                return;
+            }
             storageType = revitParam.StorageType;
             switch (storageType)
             {
