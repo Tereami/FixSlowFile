@@ -25,6 +25,12 @@ namespace FixSlowFile
                 .Cast<RebarBarType>()
                 .ToList();
 
+            if(rebarTypes.Count == 0)
+            {
+                TaskDialog.Show("Error", "В файле нет типов арматурных стержней");
+                return Result.Failed;
+            }
+
             //посмотрю, какие общие параметры проекта добавлены для типа арматуры
             Dictionary<string, MyProjectSharedParameter> projectParamsStorage = new Dictionary<string, MyProjectSharedParameter>();
             RebarBarType firstBarType = rebarTypes.First();

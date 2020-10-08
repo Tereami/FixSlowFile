@@ -11,6 +11,10 @@ namespace FixSlowFile
     {
         public static bool CheckParameterExistsInFile(DefinitionFile deffile, Guid paramGuid)
         {
+            if(deffile == null)
+            {
+                throw new Exception("Не подключен файл общих параметров");
+            }
             foreach(DefinitionGroup defgr in deffile.Groups)
             {
                 foreach(ExternalDefinition exdf in defgr.Definitions)
@@ -30,7 +34,14 @@ namespace FixSlowFile
            List <DefinitionGroup> groups = defFile.Groups.Where(i => i.Name == groupName).ToList();
             if(groups.Count == 0)
             {
-                tempGroup = defFile.Groups.Create(groupName);
+                try
+                {
+                    tempGroup = defFile.Groups.Create(groupName);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Не удалось создать группу " + groupName + " в файле общих параметров " + defFile.Filename);
+                }
             }
             else
             {
@@ -44,6 +55,10 @@ namespace FixSlowFile
             defOptions.GUID = myparam.guid;
 
             ExternalDefinition exDef = defs.Create(defOptions) as ExternalDefinition;
+            if(exDef == null)
+            {
+                throw new Exception("Не удалось создать общий параметр " + myparam.Name);
+            }
             return exDef;
         }
     }
