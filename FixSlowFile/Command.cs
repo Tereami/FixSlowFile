@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB.Structure;
@@ -15,7 +15,10 @@ namespace FixSlowFile
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            Debug.Listeners.Clear();
+            Debug.Listeners.Add(new RbsLogger.Logger("FixSlowFile"));
             string startTime = DateTime.Now.ToLongTimeString();
+            Debug.WriteLine("Start time " + startTime);
             Document doc = commandData.Application.ActiveUIDocument.Document;
 
             //получить все типы арматуры
@@ -24,7 +27,7 @@ namespace FixSlowFile
                 .OfClass(typeof(RebarBarType))
                 .Cast<RebarBarType>()
                 .ToList();
-
+            Debug.WriteLine("Rebar types found: " + rebarTypes.Count.ToString());
             if(rebarTypes.Count == 0)
             {
                 TaskDialog.Show("Error", "В файле нет типов арматурных стержней");
@@ -40,6 +43,7 @@ namespace FixSlowFile
                 if (!param.IsShared) continue;
                 MyProjectSharedParameter mpsp = new MyProjectSharedParameter(param, doc);
                 projectParamsStorage.Add(paramName, mpsp);
+                Debug.WriteLine("Shared parameter found: " + paramName);
             }
 
             //запоминаю все типы арматуры со значениями параметров
@@ -49,6 +53,7 @@ namespace FixSlowFile
             {
                 MyRebarType mrt = new MyRebarType(rbt);
                 myrebarTypes.Add(mrt);
+                Debug.WriteLine("Rebat type saved: " + mrt.bartype.Name);
             }
 
 
@@ -60,12 +65,14 @@ namespace FixSlowFile
             catch
             {
                 TaskDialog.Show("Ошибка", "Не найден файл общих параметров");
+                Debug.WriteLine("Shared parameters file isnt found");
                 return Result.Cancelled;
             }
 
             if (deffile == null)
             {
                 TaskDialog.Show("Ошибка", "Некорректный файл общих параметров");
+                Debug.WriteLine("Shared parameters file is incorrect");
                 return Result.Cancelled;
             }
 
@@ -74,6 +81,7 @@ namespace FixSlowFile
             //удаляю параметр проекта (если только 1 категория) или снимаю флажок с категории несущей арматуры (если категорий несколько)
             using (Transaction t = new Transaction(doc))
             {
+                Debug.WriteLine("Start clear parameters");
                 t.Start("Удаляю параметры несущей арматуры");
                 {
                     foreach (var kvp in projectParamsStorage)
@@ -92,11 +100,13 @@ namespace FixSlowFile
 
 
                             doc.ParameterBindings.Remove(myProjectParam.def);
+                            Debug.WriteLine("Parameter is deleted: " + myProjectParam.Name);
                         }
                         else
                         {
                             //категорий несколько, надо убрать флажок с категории несущей арматуры
                             myProjectParam.RemoveOrAddFromRebarCategory(doc, firstBarType, false);
+                            Debug.WriteLine("Flag for rebars deleted for parameter: " + myProjectParam.Name);
                         }
                     }
                 }
@@ -104,7 +114,7 @@ namespace FixSlowFile
             }
 
 
-
+            Debug.WriteLine("All parameters are deleted, go to recover");
 
             //возвращаю параметры обратно
             using (Transaction t2 = new Transaction(doc))
@@ -118,17 +128,20 @@ namespace FixSlowFile
                     {
                         //параметр был несущей арматуры, был удален совсем, значит создаю параметр
                         myProjectParam.AddToProjectParameters(doc, firstBarType);
+                        Debug.WriteLine("New parameter is created: " + myProjectParam.Name);
                     }
                     else
                     {
                         //категорий было несколько, возвращаю флажок к категории несущей арматуры
                         myProjectParam.RemoveOrAddFromRebarCategory(doc, firstBarType, true);
+                        Debug.WriteLine("Flag recovered for parameter: " + myProjectParam.Name);
                     }
                 }
 
                 t2.Commit();
             }
 
+            Debug.WriteLine("Start recover parameter values");
             //восстанавливаю значения у типов арматуры
             using (Transaction t3 = new Transaction(doc))
             {
@@ -137,6 +150,7 @@ namespace FixSlowFile
                 foreach (MyRebarType mrt in myrebarTypes)
                 {
                     RebarBarType rbt = mrt.bartype;
+                    Debug.WriteLine("Processed rebar type: " + mrt.Name);
 
                     foreach (Parameter param in rbt.ParametersMap)
                     {
@@ -144,14 +158,17 @@ namespace FixSlowFile
                         MyParameterValue mpv = mrt.ValuesStorage[paramName];
                         if (mpv.IsNull) continue;
                         mpv.SetValue(param);
+                        Debug.WriteLine("Parameter " + paramName + ", set value " + mpv.ToString());
                     }
                 }
 
                 t3.Commit();
             }
             string endTime = DateTime.Now.ToLongTimeString();
+            string msg = "Выполнено! Время старта: " + startTime + ", окончания: " + endTime;
 
-            TaskDialog.Show("Fix", "Выполнено! Время старта: " + startTime + ", окончания: " + endTime);
+            TaskDialog.Show("Fix", msg);
+            Debug.WriteLine(msg);
 
             return Result.Succeeded;
         }

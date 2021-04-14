@@ -54,6 +54,25 @@ namespace FixSlowFile
             }
         }
 
+        public override string ToString()
+        {
+            switch (storageType)
+            {
+                case StorageType.None:
+                    return "none value";
+                case StorageType.Integer:
+                    return IntegerValue.ToString();
+                case StorageType.Double:
+                    return DoubleValue.ToString("F2");
+                case StorageType.String:
+                    return StringValue;
+                case StorageType.ElementId:
+                    return ElementIdValue.ToString();
+                default:
+                    throw new Exception("Invalid value for StorageType");
+            }
+        }
+
         public void SetValue(Parameter revitParam)
         {
             if (revitParam.IsReadOnly) return;
@@ -82,5 +101,7 @@ namespace FixSlowFile
                     throw new Exception("Invalid value for StorageType");
             }
         }
+
+
     }
 }
