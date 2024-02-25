@@ -50,8 +50,13 @@ namespace FixSlowFile
             
             
             Definitions defs = tempGroup.Definitions;
+#if R2017 || R2018 || R2019 || R2020 || R2021
             ExternalDefinitionCreationOptions defOptions =
                   new ExternalDefinitionCreationOptions(myparam.Name, myparam.def.ParameterType);
+#else
+            ExternalDefinitionCreationOptions defOptions =
+                  new ExternalDefinitionCreationOptions(myparam.Name, myparam.def.GetDataType());
+#endif
             defOptions.GUID = myparam.guid;
 
             ExternalDefinition exDef = defs.Create(defOptions) as ExternalDefinition;
