@@ -9,7 +9,7 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		R2017|Any CPU = R2017|Any CPU
 		R2018|Any CPU = R2018|Any CPU
-		2019|Any CPU = R2019|Any CPU
+		R2019|Any CPU = R2019|Any CPU
 		R2020|Any CPU = R2020|Any CPU
 		R2021|Any CPU = R2021|Any CPU
 		R2022|Any CPU = R2022|Any CPU
