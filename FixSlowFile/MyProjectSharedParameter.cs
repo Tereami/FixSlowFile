@@ -14,9 +14,13 @@ namespace FixSlowFile
         public string Name { get; set; }
         public Definition def;
         public List<Category> categories = new List<Category>();
+#if R2017 || R2018 || R2019 || R2020 || R2021 || R2022 || R2023
         public BuiltInParameterGroup paramGroup;
+#else
+        public ForgeTypeId paramGroup;
+#endif
         public Guid guid;
-        
+
 
         public MyProjectSharedParameter(Parameter param, Document doc)
         {
@@ -24,7 +28,12 @@ namespace FixSlowFile
             Name = def.Name;
 
             InternalDefinition intDef = def as InternalDefinition;
-            if (intDef != null) paramGroup = intDef.ParameterGroup;
+            if (intDef != null)
+#if R2017 || R2018 || R2019 || R2020 || R2021 || R2022 || R2023
+                paramGroup = intDef.ParameterGroup;
+#else
+                paramGroup = intDef.GetGroupTypeId();
+#endif
 
             guid = param.GUID;
 
@@ -45,10 +54,14 @@ namespace FixSlowFile
 
             //получаю список категорий
             CategorySet newCatSet = app.Create.NewCategorySet();
+#if R2017 || R2018 || R2019 || R2020 || R2021 || R2022 || R2023
             int rebarcatid = new ElementId(BuiltInCategory.OST_Rebar).IntegerValue;
+#else
+            int rebarcatid = (int)(new ElementId(BuiltInCategory.OST_Rebar).Value);
+#endif
             foreach (Category cat in elemBind.Categories)
             {
-                int catId = cat.Id.IntegerValue;
+                int catId = cat.Id.GetElementId();
                 if (catId != rebarcatid)
                 {
                     newCatSet.Insert(cat);
@@ -83,7 +96,7 @@ namespace FixSlowFile
         {
             Application app = doc.Application;
             //string oldSharedParamsFile = app.SharedParametersFilename;
-            
+
             ExternalDefinition exDef = null;
             string sharedFile = app.SharedParametersFilename;
             DefinitionFile sharedParamFile = app.OpenSharedParameterFile();

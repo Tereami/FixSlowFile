@@ -84,6 +84,15 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <AssemblyName>$(AssemblyName)_2024</AssemblyName>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'R2025|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\R2025\</OutputPath>
+    <DefineConstants>DEBUG;R2025</DefineConstants>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <AssemblyName>$(AssemblyName)_2025</AssemblyName>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="RbsLogger">
       <HintPath>..\..\RbsLogger\RbsLogger\bin\Debug\RbsLogger.dll</HintPath>
@@ -226,10 +235,27 @@
         </Reference>
       </ItemGroup>
     </When>
+    <When Condition=" '$(Configuration)'=='R2025' ">
+      <ItemGroup>
+        <Reference Include="RevitAPI">
+          <HintPath>C:\Program Files\Autodesk\Revit 2025\RevitAPI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RevitAPIUI">
+          <HintPath>C:\Program Files\Autodesk\Revit 2025\RevitAPIUI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="AdWindows">
+          <HintPath>C:\Program Files\Autodesk\Revit 2025\AdWindows.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
   </Choose>
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Command.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="MyParameterValue.cs" />
     <Compile Include="MyProjectSharedParameter.cs" />
     <Compile Include="MyRebarType.cs" />
